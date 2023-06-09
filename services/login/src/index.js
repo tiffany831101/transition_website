@@ -1,0 +1,31 @@
+const express = require("express");
+const { PORT } = require("./config");
+const { executeQuery } = require("./db/connection");
+const LoginService = require("./services/login-service");
+
+// const { databaseConnection } = require('./database');
+// const expressApp = require('./express-app');
+
+const StartServer = async () => {
+  const app = express();
+
+  app
+    .listen(PORT, () => {
+      console.log("server is running on port: ", PORT);
+    })
+    .on("error", (err) => {
+      console.log(err);
+      process.exit();
+    });
+
+  // test for if the api is correct...
+  app.get("/test", async (req, res, next) => {
+    const service = new LoginService();
+  });
+
+  app.use("/", (req, res, next) => {
+    return res.status(200).json({ msg: "Hello from Shopping" });
+  });
+};
+
+StartServer();
