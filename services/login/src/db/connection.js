@@ -36,4 +36,5 @@ async function executeQuery(sql, params) {
 
 module.exports = {
   executeQuery,
+  usersTable: "users",
 };
