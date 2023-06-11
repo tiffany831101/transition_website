@@ -2,11 +2,19 @@ const LoginService = require("../services/login-service");
 const { PublishCustomerEvent, SubscribeMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
 const { CUSTOMER_SERVICE } = require("../config");
-const { PublishMessage } = require("../utils");
+const {
+  PublishMessage,
+  checkAllInputFilled,
+  ValidateSignature,
+} = require("../utils");
 
-module.exports = (app, channel) => {
+// 原本有 channel
+module.exports = (app) => {
   const service = new LoginService();
 
+  /**
+   * this is not used...
+   */
   app.post("/register", async (req, res) => {
     try {
       // Get user input
@@ -52,6 +60,46 @@ module.exports = (app, channel) => {
     } catch (err) {
       console.log(err);
     }
+  });
+
+  app.post("/signup", async (req, res) => {
+    try {
+      const { nickname, email, password } = req.body;
+      if (!(nickname && email && password)) {
+        res.status(400).send("All input is required");
+        return;
+      }
+
+      const userToken = await service.signUp({ nickname, email, password });
+
+      res.status(200).json(userToken);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+  app.post("/signin", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const isAllInputFieldFilled = checkAllInputFilled({
+        email,
+        password,
+      });
+      if (!isAllInputFieldFilled) {
+        res.status(400).send("All input is required");
+        return;
+      }
+
+      const userToken = await service.signIn({ email, password });
+
+      res.status(200).json(userToken);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+  app.get("/test", UserAuth, async (req, res) => {
+    res.status(200).json({
+      status: "success",
+    });
   });
 
   // SubscribeMessage(channel, service)

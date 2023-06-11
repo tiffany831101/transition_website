@@ -4,7 +4,7 @@ const { executeQuery } = require("./db/connection");
 const LoginService = require("./services/login-service");
 
 // const { databaseConnection } = require('./database');
-// const expressApp = require('./express-app');
+const expressApp = require("./express-app");
 
 const StartServer = async () => {
   const app = express();
@@ -18,10 +18,21 @@ const StartServer = async () => {
       process.exit();
     });
 
+  await expressApp(app);
+
   // test for if the api is correct...
-  app.get("/test", async (req, res, next) => {
-    const service = new LoginService();
-  });
+  // app.get("/test", async (req, res, next) => {
+  //   const service = new LoginService();
+  //   const email = "tiffany831101@gmail.com";
+  //   const nickname = "tiffany";
+  //   const password = "12345";
+  //   const data = await service.signIn({
+  //     email,
+  //     password,
+  //   });
+
+  //   console.log("check data: ", data);
+  // });
 
   app.use("/", (req, res, next) => {
     return res.status(200).json({ msg: "Hello from Shopping" });

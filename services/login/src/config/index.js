@@ -14,6 +14,7 @@ module.exports = {
   DB_PWD: process.env.DB_PWD,
   DB_ROOT_ACCOUNT: process.env.DB_ROOT_ACCOUNT,
   DB_TABLE_NAME: process.env.DB_TABLE_NAME,
+  APP_SECRET: process.env.APP_SECRET,
   // DB_URL: process.env.MONGODB_URI,
   // APP_SECRET: process.env.APP_SECRET,
   // BASE_URL: process.env.BASE_URL,

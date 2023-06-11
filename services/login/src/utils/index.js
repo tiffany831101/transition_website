@@ -38,8 +38,7 @@ module.exports.GenerateSignature = async (payload) => {
 module.exports.ValidateSignature = async (req) => {
   try {
     const signature = req.get("Authorization");
-    console.log(signature);
-    const payload = await jwt.verify(signature.split(" ")[1], APP_SECRET);
+    const payload = await jwt.verify(signature, APP_SECRET);
     req.user = payload;
     return true;
   } catch (error) {
@@ -56,6 +55,9 @@ module.exports.FormateData = (data) => {
   }
 };
 
+module.exports.checkAllInputFilled = ({ email, password }) => {
+  return email && password;
+};
 //Message Broker
 
 module.exports.CreateChannel = async () => {

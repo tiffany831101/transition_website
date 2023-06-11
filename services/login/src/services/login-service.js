@@ -14,25 +14,78 @@ class LoginService {
     this.repository = new LoginRepository();
   }
 
-  // from api
+  /**
+   * first check if user is created or not
+   * then check if the pwd is correct
+   * @param { object } userInputs
+   * @returns token and the userid => should be stored in the sessionStorage
+   */
   async signIn(userInputs) {
     const { email, password } = userInputs;
-    const hasUserSignedUp = await this.checkIfUserSignedUp({ email });
-    // if (hasUserSignedUp) {
-    //   const validPassword = await ValidatePassword(
-    //     password,
-    //     existingCustomer.password,
-    //     existingCustomer.salt
-    //   );
-    //   if (validPassword) {
-    //     const token = await GenerateSignature({
-    //       email: existingCustomer.email,
-    //       _id: existingCustomer._id,
-    //     });
-    //     return FormateData({ id: existingCustomer._id, token });
-    //   }
-    // }
-    // return FormateData(null);
+    const existingCustomer = await this.findUsers({ email });
+
+    const hasUserSignedUp = this.checkIfUserSignedUp(existingCustomer);
+    if (hasUserSignedUp) {
+      const validPassword = await ValidatePassword(
+        password,
+        existingCustomer[0].password,
+        existingCustomer[0].salt
+      );
+      if (validPassword) {
+        const token = await GenerateSignature({
+          email: existingCustomer.email,
+          _id: existingCustomer.id,
+        });
+        return FormateData({ id: existingCustomer[0].id, token });
+      }
+    } else {
+      // redirect to the signup page
+      return {
+        id: -1,
+        token: null,
+      };
+    }
+  }
+
+  /**
+   * generate salt and add to the pwd
+   * create user
+   * generate signature
+   * if signup before, pls route to
+   * @param { object } userInputs
+   * @returns token and the userid => should be stored in the sessionStorage
+   */
+  async signUp(userInputs) {
+    const { nickname, email, password } = userInputs;
+
+    const userInfo = await this.findUsers({ email });
+
+    const hasUserSignedUp = this.checkIfUserSignedUp(userInfo);
+
+    // route to signin page:
+    if (hasUserSignedUp) {
+      return {
+        id: -1,
+        token: null,
+      };
+    }
+
+    let salt = await GenerateSalt();
+    let userPassword = await GeneratePassword(password, salt);
+
+    const existingCustomer = await this.repository.createUser({
+      nickname,
+      email,
+      password: userPassword,
+      salt,
+    });
+    const { insertId } = existingCustomer;
+    const token = await GenerateSignature({
+      email: email,
+      _id: existingCustomer["insertId"],
+    });
+
+    return FormateData({ id: insertId, token });
   }
 
   async findUsers({ email }) {
@@ -44,10 +97,9 @@ class LoginService {
     return ids;
   }
 
-  async checkIfUserSignedUp({ email }) {
-    return !!this.findUsers({ email });
-  } // return true...代表已經註冊過了
-
+  checkIfUserSignedUp(userInfo) {
+    return !!userInfo.length;
+  }
   //   async PlaceOrder(userInput){
 
   //       const { _id, txnNumber } = userInput
