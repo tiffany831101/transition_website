@@ -51,7 +51,7 @@ class LoginService {
    * generate salt and add to the pwd
    * create user
    * generate signature
-   * if signup before, pls route to signin page, not duplicate signup
+   * if signup before, pls route to signin page, no duplicate signup
    * @param { object } userInputs
    * @returns token and the userid => should be stored in the sessionStorage
    */
