@@ -37,20 +37,12 @@ jobs:
           # Build and tag the Docker images
           docker-compose build
           docker images
-
           # Log in to ECR
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
           
-          # Tag transition website login applications push the Docker images to ECR
+          # Tag 
           docker tag transition_website_login ${{ env.ECR_REPOSITORY }}:$(date +%s)
-          docker push ${{ env.ECR_REPOSITORY }}:$(date +%s)
-
-
-          # Tag and push the MySQL image to ECR
-          docker tag mysql:8 ${{ env.ECR_REPOSITORY }}/mysql:latest
-          docker push ${{ env.ECR_REPOSITORY }}/mysql:latest
           
-          # Tag and push the phpmyadmin image to ECR
-          docker tag phpmyadmin/phpmyadmin ${{ env.ECR_REPOSITORY }}/phpmyadmin:latest
-          docker push ${{ env.ECR_REPOSITORY }}/phpmyadmin:latest
+          # Push the Docker images to ECR
+          docker push ${{ env.ECR_REPOSITORY }}:$(date +%s)
 
