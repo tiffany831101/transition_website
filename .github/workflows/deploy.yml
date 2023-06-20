@@ -42,4 +42,4 @@ jobs:
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
 
           # Push the Docker images to ECR
-           docker-compose -f ./docker-compose.yml push
+           docker-compose push
