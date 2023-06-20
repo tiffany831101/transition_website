@@ -21,17 +21,15 @@ jobs:
           aws-region: <your_aws_region>
 
       - name: Set up environment variables
-        env:
-          ECR_REPOSITORY: transition_website	
-          # db related
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_PWD: ${{ secrets.DB_PWD }}
-          DB_ROOT_ACCOUNT: ${{ secrets.DB_ROOT_ACCOUNT }}
-          DB_TABLE_NAME: ${{ secrets.DB_TABLE_NAME }}
-          # app related
-          PORT: ${{secrets.PORT}}
-          APP_SECRET: ${{secrets.APP_SECRET}}
+        run: |
+          echo "ECR_REPOSITORY=transition_website" >> $GITHUB_ENV
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+          echo "DB_PWD=${{ secrets.DB_PWD }}" >> $GITHUB_ENV
+          echo "DB_ROOT_ACCOUNT=${{ secrets.DB_ROOT_ACCOUNT }}" >> $GITHUB_ENV
+          echo "DB_TABLE_NAME=${{ secrets.DB_TABLE_NAME }}" >> $GITHUB_ENV
+          echo "PORT=${{ secrets.PORT }}" >> $GITHUB_ENV
+          echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> $GITHUB_ENV
           
       - name: Create production env file and Push to ECR  
         run: |
