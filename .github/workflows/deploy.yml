@@ -35,10 +35,11 @@ jobs:
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
           
           # Build and tag the Docker images
-          docker-compose build
+          docker-compose -f ./docker-compose.yml build
+
 
           # Log in to ECR
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
 
           # Push the Docker images to ECR
-          docker-compose push
+           docker-compose -f ./docker-compose.yml push
