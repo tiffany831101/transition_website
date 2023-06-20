@@ -24,6 +24,7 @@ jobs:
           
       - name: Create production env file and Push to ECR  
         run: |
+          cd ${{ github.workspace }}
           # Create production environment files
           echo "DB_HOST=${{ secrets.DB_HOST }}" > services/login/.env
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> services/login/.env
