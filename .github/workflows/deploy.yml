@@ -36,10 +36,13 @@ jobs:
           
           # Build and tag the Docker images
           docker-compose build
-
+          docker images
 
           # Log in to ECR
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
 
           # Push the Docker images to ECR
           docker-compose push
+      - name: Verify pushed images in ECR
+        run: |
+          aws ecr describe-images --repository-name $ECR_REPOSITORY
