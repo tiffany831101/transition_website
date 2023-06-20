@@ -35,14 +35,14 @@ jobs:
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
           
           # Build and tag the Docker images
-          docker-compose build
+          docker-compose build -t transition_website .
           docker images
 
           # Log in to ECR
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
 
+
+          # tag docker images
+          docker tag transition_website:latest ${{ env.ECR_REPOSITORY }}:latest
           # Push the Docker images to ECR
-          docker-compose push
-      - name: Verify pushed images in ECR
-        run: |
-          aws ecr describe-images --repository-name ${{ env.ECR_REPOSITORY }}
+          docker push ${{ env.ECR_REPOSITORY }}:latest
