@@ -35,7 +35,7 @@ jobs:
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
           
           # Build and tag the Docker images
-          docker-compose build -t transition-service:$(date +%s)
+          docker-compose build -t transition-service:$(date +%s) .
           docker images
 
           # Log in to ECR
