@@ -39,6 +39,9 @@ jobs:
           docker-compose build
           docker images
 
+      - name: login
+        run: aws ecr-public get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
+
       - name: Tag Docker image
         run: |
           docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
