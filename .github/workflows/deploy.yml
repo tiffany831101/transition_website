@@ -21,11 +21,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: Login to Amazon ECR Public
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          registry: public.ecr.aws
-          region: ${{ secrets.AWS_REGION }}
           
       - name: Create production env file and Push to ECR  
         run: |
@@ -43,6 +38,10 @@ jobs:
         run: |
           docker-compose build
           docker images
+          
+      - name: Login in ECS
+        run: |
+          aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
           
       - name: Tag Docker image
         run: |
