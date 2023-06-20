@@ -1,13 +1,14 @@
 FROM node
 
-WORKDIR /app/shopping
+WORKDIR /service/login
 
 COPY package.json .
 
+RUN npm install -g nodemon
 RUN npm install
 
 COPY . .
 
 EXPOSE 8003
 
-CMD ["npm", "start"]
+CMD ["sh", "-c", "NODE_ENV=prod && nodemon src/index.js"]
