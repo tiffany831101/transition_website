@@ -45,4 +45,4 @@ jobs:
           docker-compose push
       - name: Verify pushed images in ECR
         run: |
-          aws ecr describe-images --repository-name $ECR_REPOSITORY
+          aws ecr describe-images --repository-name ${{ env.ECR_REPOSITORY }}
