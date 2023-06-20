@@ -22,6 +22,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
           
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+          
       - name: Create production env file and Push to ECR  
         run: |
           cd ${{ github.workspace }}
@@ -34,18 +38,15 @@ jobs:
           echo "PORT=${{ secrets.PORT }}" >> services/login/.env
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
           
-          # Build and tag the Docker images
+      - name: Build and tag the Docker images
+        run: |
           docker-compose build
           docker images
-          # Log in to ECR
-          # aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
-          aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
-          # aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} --no-include-email | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}/transition_website
 
-          
-          # Tag 
-          docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
-          
-          # Push the Docker images to ECR
-          docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+      - name: Tag Docker image
+        run: |
+          docker tag transition_website_login ${{ steps.login-ecr.outputs.registry }}/transition_website:$(date +%s)
 
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/transition_website:$(date +%s)
