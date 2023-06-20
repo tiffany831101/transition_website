@@ -22,10 +22,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
           
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-          
       - name: Create production env file and Push to ECR  
         run: |
           cd ${{ github.workspace }}
@@ -45,8 +41,8 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag transition_website_login ${{ steps.login-ecr.outputs.registry }}/transition_website:$(date +%s)
+          docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
 
-      - name: Push Docker image to ECR
+      - name: Push Docker image to ECR Public
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/transition_website:$(date +%s)
+          docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
