@@ -25,7 +25,7 @@ services:
     ports:
       - 8003:8003
     environment:
-      - NODE_ENV=dev
+      - NODE_ENV=prod
     restart: always
 
 volumes:
