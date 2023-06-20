@@ -38,11 +38,11 @@ jobs:
           docker-compose build
           docker images
           # Log in to ECR
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
-          
+          # aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
+          aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
           # Tag 
-          docker tag transition_website_login ${{ env.ECR_REPOSITORY }}:$(date +%s)
+          docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
           
           # Push the Docker images to ECR
-          docker push ${{ env.ECR_REPOSITORY }}:$(date +%s)
+          docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
 
