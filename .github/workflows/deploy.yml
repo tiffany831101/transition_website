@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      ECR_REPOSITORY: transition_website
+      ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
 
     steps:
       - name: Checkout code
