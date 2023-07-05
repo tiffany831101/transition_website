@@ -5,6 +5,7 @@ services:
     build:
       context: ./services/login
       dockerfile: Dockerfile
+    image: login-service-image
     ports:
       - 0:8003
     environment:
@@ -15,6 +16,7 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+    image: nginx-image
     depends_on:
       - login_service
     ports:

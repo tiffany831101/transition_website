@@ -21,32 +21,29 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
-      - name: Create production env file and Push to ECR  
+
+      - name: Create production env file and Push to ECR
         run: |
           cd ${{ github.workspace }}
           # Create production environment files
-          echo "DB_HOST=${{ secrets.DB_HOST }}" > services/login/.env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> services/login/.env
-          echo "DB_PWD=${{ secrets.DB_PWD }}" >> services/login/.env
-          echo "DB_ROOT_ACCOUNT=${{ secrets.DB_ROOT_ACCOUNT }}" >> services/login/.env
-          echo "DB_TABLE_NAME=${{ secrets.DB_TABLE_NAME }}" >> services/login/.env
-          echo "PORT=${{ secrets.PORT }}" >> services/login/.env
+          echo "ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > services/login/.env
+          echo "SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> services/login/.env
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
-          
+
       - name: Build and tag the Docker images
         run: |
           docker-compose build
           docker images
-          
-      - name: Login in ECS
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-          
-      - name: Tag Docker image
-        run: |
-          docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+          cat services/login/.env
 
-      - name: Push Docker image to ECR Public
-        run: |
-          docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+      # - name: Login in ECS
+      #   run: |
+      #     aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
+      # - name: Tag Docker image
+      #   run: |
+      #     docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+
+      # - name: Push Docker image to ECR Public
+      #   run: |
+      #     docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
