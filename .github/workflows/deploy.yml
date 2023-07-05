@@ -5,6 +5,7 @@ on:
     branches:
       - main
 env:
+  AWS_REGION: us-east-1
   ECS_LOGIN_SERVICE_TASK_DEFINITION: ./.aws/task-definition-ls.json
   LOGIN_SERVICE_CONTAINER_NAME: login_service
   LOGIN_ECS_SERVICE: login_service
@@ -71,6 +72,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set essential login AWS details to configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Update task definition's container image
         id: login_service_task_def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
