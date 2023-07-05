@@ -42,6 +42,18 @@ jobs:
           docker-compose build
           docker images
           cat services/login/.env
+          
+      - name: Login in ECS
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
+      - name: Tag Docker image
+        run: |
+          docker tag login_service_image ${{ env.ECR_REPOSITORY }}/transition_website:login_service_image_${{ github.sha }}
+
+      - name: Push Docker image to ECR Public
+        run: |
+          docker push ${{ env.ECR_REPOSITORY }}/transition_website:login_service_image_${{ github.sha }}
 
       # - name: Login in ECS
       #   run: |
