@@ -60,7 +60,7 @@ jobs:
 
       - name: Tag Nginx Service Docker image
         run: |
-          docker tag nginx_service ${{ env.ECR_REPOSITORY }}/transition_website:nginx_service_${{ github.sha }}
+          docker tag nginx_image ${{ env.ECR_REPOSITORY }}/transition_website:nginx_service_${{ github.sha }}
 
       - name: Push Nginx Service Docker image to ECR Public
         run: |
