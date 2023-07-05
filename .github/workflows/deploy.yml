@@ -37,9 +37,12 @@ jobs:
       - name: Create nginx.conf file
         env:
           EC2_PUBLIC_HOST_NAME: ${{ secrets.EC2_PUBLIC_HOST_NAME }}
+          ALB_SERVER_DNS: ${{ secrets.ALB_SERVER_DNS }}
+          ALB_SERVER_PORT: ${{ secrets.ALB_SERVER_PORT }}
         run: |
           cd ./nginx
-          envsubst '${EC2_PUBLIC_HOST_NAME}' < nginx.template.conf > nginx.conf
+          envsubst '${EC2_PUBLIC_HOST_NAME}''${EC2_PUBLIC_HOST_NAME} ${ALB_SERVER_DNS} ${ALB_SERVER_PORT}' < nginx.template.conf > nginx.conf
+          cat nginx.conf
 
       - name: Build and tag the Docker images
         run: |
@@ -95,3 +98,15 @@ jobs:
           service: ${{ env.LOGIN_ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+  deploy_nginx_service:
+    needs: deploy_login_service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set essential login AWS details to configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
