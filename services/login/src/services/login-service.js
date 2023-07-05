@@ -79,13 +79,15 @@ class LoginService {
       password: userPassword,
       salt,
     });
-    const { insertId } = existingCustomer;
+
+    const { id } = existingCustomer;
+
     const token = await GenerateSignature({
       email: email,
-      _id: existingCustomer["insertId"],
+      _id: existingCustomer["id"],
     });
 
-    return FormateData({ id: insertId, token });
+    return FormateData({ id: id, token });
   }
 
   async findUsers({ email }) {

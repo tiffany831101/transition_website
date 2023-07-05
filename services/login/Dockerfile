@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8003
 
-CMD ["sh", "-c", "NODE_ENV=prod && nodemon src/index.js"]
+CMD ["sh", "-c", "NODE_ENV=prod && node src/index.js"]
