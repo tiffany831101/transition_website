@@ -1,32 +1,24 @@
 version: '3'
 services:
-  mysql:
-    image: mysql:8
-    ports:
-      - 3306:3306
-    command: '--init-file /data/application/init.sql'
-    volumes:
-      - './init.sql:/data/application/init.sql'
-      - './data:/var/lib/mysql'
-    environment:
-      - MYSQL_ROOT_PASSWORD=pwd
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - 8081:80
-    links:
-      - mysql:db
-
-  login:
+  login_service:
+    container_name: login_service
     build:
       context: ./services/login
       dockerfile: Dockerfile
     ports:
-      - 8003:8003
+      - 0:8003
     environment:
       - NODE_ENV=prod
     restart: always
-
-volumes:
-  mysql_data:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    depends_on:
+      - login_service
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /home/ec2-user/logs/nginx:/var/log/nginx
