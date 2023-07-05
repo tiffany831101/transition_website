@@ -69,6 +69,8 @@ jobs:
     needs: push_images_ecr
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Update task definition's container image
         id: login_service_task_def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
