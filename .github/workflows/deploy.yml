@@ -4,13 +4,16 @@ on:
   push:
     branches:
       - main
+env:
+  ECS_LOGIN_SERVICE_TASK_DEFINITION: ./.aws/task-definition-ls.json
+  LOGIN_SERVICE_CONTAINER_NAME: login_service
+  LOGIN_ECS_SERVICE: login_service
+  ECS_CLUSTER: MyEcsCluster
+  ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
 
 jobs:
-  deploy:
+  push_images_ecr:
     runs-on: ubuntu-latest
-    env:
-      ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -29,9 +32,9 @@ jobs:
           echo "ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" > services/login/.env
           echo "SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> services/login/.env
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
-      
+
       - name: Create nginx.conf file
-        env: 
+        env:
           EC2_PUBLIC_HOST_NAME: ${{ secrets.EC2_PUBLIC_HOST_NAME }}
         run: |
           cd ./nginx
@@ -42,27 +45,42 @@ jobs:
           docker-compose build
           docker images
           cat services/login/.env
-          
+
       - name: Login in ECS
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
-      - name: Tag Docker image
+      - name: Tag Login Service Docker image
         run: |
           docker tag login_service_image ${{ env.ECR_REPOSITORY }}/transition_website:login_service_image_${{ github.sha }}
 
-      - name: Push Docker image to ECR Public
+      - name: Push Login Service Docker image to ECR Public
         run: |
           docker push ${{ env.ECR_REPOSITORY }}/transition_website:login_service_image_${{ github.sha }}
 
-      # - name: Login in ECS
-      #   run: |
-      #     aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      - name: Tag Nginx Service Docker image
+        run: |
+          docker tag nginx_service ${{ env.ECR_REPOSITORY }}/transition_website:nginx_service_${{ github.sha }}
 
-      # - name: Tag Docker image
-      #   run: |
-      #     docker tag transition_website_login ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+      - name: Push Nginx Service Docker image to ECR Public
+        run: |
+          docker push ${{ env.ECR_REPOSITORY }}/transition_website:nginx_service_${{ github.sha }}
+  deploy_login_service:
+    needs: push_images_ecr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update task definition's container image
+        id: login_service_task_def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_LOGIN_SERVICE_TASK_DEFINITION }}
+          container-name: ${{ env.LOGIN_SERVICE_CONTAINER_NAME }}
+          image: ${{ env.ECR_REPOSITORY }}/transition_website:login_service_image_${{ github.sha }}
 
-      # - name: Push Docker image to ECR Public
-      #   run: |
-      #     docker push ${{ env.ECR_REPOSITORY }}/transition_website:$(date +%s)
+      - name: Deploy Login Service Task Definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.login_service_task_def.outputs.task-definition }}
+          service: ${{ env.LOGIN_ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
