@@ -35,7 +35,7 @@ jobs:
           EC2_PUBLIC_HOST_NAME: ${{ secrets.EC2_PUBLIC_HOST_NAME }}
         run: |
           cd ./nginx
-          envsubst '${EC2_PUBLIC_HOST_NAME}' < nginx.conf.template > nginx.conf
+          envsubst '${EC2_PUBLIC_HOST_NAME}' < nginx.template.conf > nginx.conf
 
       - name: Build and tag the Docker images
         run: |
