@@ -78,6 +78,8 @@ module.exports = (app) => {
     }
   });
   app.post("/signin", async (req, res) => {
+    console.log("req: ", req);
+    console.log("signin is running here...");
     try {
       const { email, password } = req.body;
       const isAllInputFieldFilled = checkAllInputFilled({
