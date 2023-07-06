@@ -9,6 +9,7 @@ const {
   MSG_QUEUE_URL,
 } = require("../config");
 
+console.log("app secret: ", APP_SECRET);
 //Utility functions
 module.exports.GenerateSalt = async () => {
   return await bcrypt.genSalt();
