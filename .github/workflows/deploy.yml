@@ -9,6 +9,12 @@ env:
   ECS_LOGIN_SERVICE_TASK_DEFINITION: ./.aws/task-definition-ls.json
   LOGIN_SERVICE_CONTAINER_NAME: login_service
   LOGIN_ECS_SERVICE: login_service
+  ECS_NGINX_SERVICE_TASK_DEFINITION: ./.aws/task-definition-nginx.json
+  NGINX_SERVICE_CONTAINER_NAME: nginx
+  NGINX_ECS_SERVICE: nginx_service
+
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
   ECS_CLUSTER: MyEcsCluster
   ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
 
@@ -16,6 +22,12 @@ jobs:
   push_images_ecr:
     runs-on: ubuntu-latest
     steps:
+      - name: Start the process of deployment to ECS
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_MESSAGE: "Start deploy backend service :green_heart:"
+          SLACK_TITLE: Deploy start
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -74,6 +86,12 @@ jobs:
     needs: push_images_ecr
     runs-on: ubuntu-latest
     steps:
+      - name: Start deploy login service
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_MESSAGE: "Start deploy login service :heart:"
+          SLACK_TITLE: Login-related
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -103,11 +121,41 @@ jobs:
     needs: deploy_login_service
     runs-on: ubuntu-latest
     steps:
+      - name: Start deploy nginx service
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_MESSAGE: "Start deploy nginx service :green_heart:"
+          SLACK_TITLE: Nginx-related
+
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Set essential login AWS details to configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update task definition's container image FOR NGINX
+        id: nginx_service_task_def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_NGINX_SERVICE_TASK_DEFINITION }}
+          container-name: ${{ env.NGINX_SERVICE_CONTAINER_NAME }}
+          image: ${{ env.ECR_REPOSITORY }}/transition_website:nginx_service_${{ github.sha }}
+
+      - name: Deploy NGINX Service Task Definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.nginx_service_task_def.outputs.task-definition }}
+          service: ${{ env.NGINX_ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Notify in slack when deployed into steady state
+        uses: rtCamp/action-slack-notify@v2
+        if: success()
+        env:
+          SLACK_MESSAGE: "sucessfully deployed NGINX and login service onto ecs service and a steady state :rocket:"
+          SLACK_TITLE: Success
