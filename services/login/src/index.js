@@ -11,6 +11,7 @@ const StartServer = async () => {
 
   app
     .listen(PORT, () => {
+      console.log("port is running on: ", PORT);
       console.log("server is running on port dynamically allocated..");
     })
     .on("error", (err) => {
