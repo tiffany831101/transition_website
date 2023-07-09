@@ -46,6 +46,9 @@ jobs:
           echo "PORT=8003" >> services/login/.env
           echo "SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> services/login/.env
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> services/login/.env
+          echo "OS_NODE=${{ secrets.OS_NODE }}" >> services/login/.env
+          echo "OS_PASSWORD=${{ secrets.OS_PASSWORD }}" >> services/login/.env
+          echo "OS_USERNAME=${{ secrets.OS_USERNAME }}" >> services/login/.env
 
       - name: Create nginx.conf file
         env:

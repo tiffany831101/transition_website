@@ -2,6 +2,7 @@ const express = require("express");
 const { PORT } = require("./config");
 const { executeQuery } = require("./db/connection");
 const LoginService = require("./services/login-service");
+const { logger } = require("./utils/logs-export");
 
 // const { databaseConnection } = require('./database');
 const expressApp = require("./express-app");
@@ -11,8 +12,11 @@ const StartServer = async () => {
 
   app
     .listen(PORT, () => {
-      console.log("port is running on: ", PORT);
-      console.log("server is running on port dynamically allocated..");
+      // console.log("port is running on: ", PORT);
+      logger.info("port is running on: ", PORT);
+      logger.error("is it correct???");
+      logger.info("test......");
+      logger.error("test for error now");
     })
     .on("error", (err) => {
       console.log(err);
