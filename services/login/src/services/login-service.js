@@ -37,13 +37,20 @@ class LoginService {
           _id: existingCustomer.id,
         });
         return FormateData({ id: existingCustomer[0].id, token });
+      } else {
+        return FormateData({
+          id: -1,
+          token: null,
+          reason: "INVALID_PWD",
+        });
       }
     } else {
       // redirect to the signup page
-      return {
+      return FormateData({
         id: -1,
         token: null,
-      };
+        reason: "INVALID_EMAIL",
+      });
     }
   }
 
