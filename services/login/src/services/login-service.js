@@ -71,10 +71,11 @@ class LoginService {
 
     // route to signin page:
     if (hasUserSignedUp) {
-      return {
+      return FormateData({
         id: -1,
         token: null,
-      };
+        reason: "USER_HAS_SIGNED_UP",
+      });
     }
 
     let salt = await GenerateSalt();
