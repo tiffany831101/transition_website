@@ -151,6 +151,7 @@ module.exports = (app) => {
 
     res.cookie("token", token, { httpOnly: false });
 
+    console.log("frontend url: ", FRONTEND_URL);
     res.redirect(FRONTEND_URL);
   });
 
