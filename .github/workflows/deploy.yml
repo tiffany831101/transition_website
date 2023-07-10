@@ -49,6 +49,10 @@ jobs:
           echo "OS_NODE=${{ secrets.OS_NODE }}" >> services/login/.env
           echo "OS_PASSWORD=${{ secrets.OS_PASSWORD }}" >> services/login/.env
           echo "OS_USERNAME=${{ secrets.OS_USERNAME }}" >> services/login/.env
+          echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> services/login/.env
+          echo "GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}" >> services/login/.env
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> services/login/.env
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> services/login/.env
 
       - name: Create nginx.conf file
         env:

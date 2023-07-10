@@ -6,7 +6,14 @@ const {
   PublishMessage,
   checkAllInputFilled,
   ValidateSignature,
+  GenerateSignature,
 } = require("../utils");
+const { FRONTEND_URL } = require("../config");
+
+// passport related
+const passport = require("passport");
+const cookieSession = require("cookie-session");
+require("../utils/passport");
 
 // 原本有 channel
 module.exports = (app) => {
@@ -103,6 +110,56 @@ module.exports = (app) => {
       status: "success",
     });
   });
+
+  // start for google login
+
+  app.use(
+    cookieSession({
+      name: "google-auth-session",
+      keys: ["key1", "key2"],
+    })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // Auth
+  app.get(
+    "/auth",
+    passport.authenticate("google", { scope: ["email", "profile"] })
+  );
+
+  // Auth Callback
+  app.get(
+    "/auth/callback",
+    passport.authenticate("google", {
+      successRedirect: "/auth/callback/success",
+      failureRedirect: "/auth/callback/failure",
+    })
+  );
+
+  // Success
+  app.get("/auth/callback/success", async (req, res) => {
+    if (!req.user) res.redirect("/auth/callback/failure");
+
+    const { email, id, displayName } = req.user;
+
+    const token = await GenerateSignature({
+      email,
+      nickname: displayName,
+      id,
+    });
+
+    res.cookie("token", token, { httpOnly: false });
+
+    res.redirect(FRONTEND_URL);
+  });
+
+  // failure
+  app.get("/auth/callback/failure", (req, res) => {
+    res.send("Error");
+  });
+
+  // end for google login
 
   // SubscribeMessage(channel, service)
 
