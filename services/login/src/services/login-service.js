@@ -32,7 +32,9 @@ class LoginService {
         existingCustomer[0].salt
       );
       if (validPassword) {
+        const nickname = existingCustomer[0].nickname;
         const token = await GenerateSignature({
+          nickname,
           email: existingCustomer.email,
           _id: existingCustomer.id,
         });
@@ -91,6 +93,7 @@ class LoginService {
     const { id } = existingCustomer;
 
     const token = await GenerateSignature({
+      nickname: nickname,
       email: email,
       _id: existingCustomer["id"],
     });
