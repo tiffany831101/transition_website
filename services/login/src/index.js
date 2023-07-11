@@ -15,7 +15,6 @@ const StartServer = async () => {
       // console.log("port is running on: ", PORT);
       logger.info("port is running on: ", PORT);
       logger.error("is it correct???");
-      logger.info("test......");
       logger.error("test for error now");
     })
     .on("error", (err) => {
