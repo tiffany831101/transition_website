@@ -11,6 +11,19 @@ services:
     environment:
       - NODE_ENV=prod
     restart: always
+  resume_service:
+    container_name: resume_service
+    build:
+      context: ./services/resume
+      dockerfile: Dockerfile
+    image: resume_service_image
+    depends_on:
+      - login_service
+    ports:
+      - 0:8004
+    environment:
+      - NODE_ENV=prod
+    restart: always
   nginx:
     container_name: nginx
     build:
@@ -18,7 +31,7 @@ services:
       dockerfile: Dockerfile
     image: nginx_image
     depends_on:
-      - login_service
+      - resume_service
     ports:
       - 80:80
     volumes:
