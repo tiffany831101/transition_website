@@ -110,7 +110,7 @@ jobs:
 
       - name: Tag Resume Service Docker image
         run: |
-          docker tag resume_image ${{ env.ECR_REPOSITORY }}/transition_website:resume_service_${{ github.sha }}
+          docker tag resume_service_image ${{ env.ECR_REPOSITORY }}/transition_website:resume_service_${{ github.sha }}
 
       - name: Push Resume Service Docker image to ECR Public
         run: |
