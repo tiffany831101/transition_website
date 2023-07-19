@@ -32,7 +32,7 @@ const { v4: uuidv4 } = require("uuid");
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 async function executeQuery(queryType, params) {
   let queryParams = {
-    TableName: "user",
+    TableName: "resume",
     ...params,
   };
 

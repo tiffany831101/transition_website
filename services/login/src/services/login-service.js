@@ -35,9 +35,10 @@ class LoginService {
         const nickname = existingCustomer[0].nickname;
         const token = await GenerateSignature({
           nickname,
-          email: existingCustomer.email,
-          _id: existingCustomer.id,
+          email: existingCustomer[0].email,
+          _id: existingCustomer[0].id,
         });
+
         return FormateData({ id: existingCustomer[0].id, token });
       } else {
         return FormateData({

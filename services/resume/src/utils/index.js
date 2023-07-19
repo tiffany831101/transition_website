@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const amqplib = require("amqplib");
 
+const jwt_decode = require("jwt-decode");
 const {
   APP_SECRET,
   EXCHANGE_NAME,
@@ -38,7 +39,14 @@ module.exports.GenerateSignature = async (payload) => {
 
 module.exports.ValidateSignature = async (req) => {
   try {
-    const signature = req.get("Authorization");
+    // const signature = req.get("Authorization");
+    const authorization = req.get("Authorization");
+
+    console.log("auth: ", authorization);
+    const signature =
+      authorization && authorization.startsWith("Bearer ")
+        ? authorization.substring(7)
+        : "";
     const payload = await jwt.verify(signature, APP_SECRET);
     req.user = payload;
     return true;
@@ -97,4 +105,14 @@ module.exports.SubscribeMessage = async (channel, service) => {
       noAck: true,
     }
   );
+};
+
+module.exports.DecodeJWT = async (req) => {
+  try {
+    const token = req.get("Authorization").split(" ")[1];
+    const decoded = jwt_decode(token);
+    return decoded;
+  } catch (err) {
+    throw err;
+  }
 };

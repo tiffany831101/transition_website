@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <style>
+    html {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .center {
+      max-width: 340px;
+      height: 1122.520px;
+        background-image: linear-gradient(#104375, #0576d5);
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
+        0 6px 6px rgba(0, 0, 0, 0.23);
+    }
+
+    .thin-border {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-top: 133px;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    p {
+      margin-top: -20px;
+      padding-right: 50px;
+    }
+
+    div {
+      margin-top: -10px;
+    }
+
+    .details {
+      margin-top: 50px;
+    }
+
+    .details p {
+      font-family: sans-serif;
+      float: top;
+      margin-top: -43px;
+      text-align: center;
+
+    }
+
+    .education-details {
+      position: absolute;
+      left: 400px;
+      top: 30px;
+      font-size: 16px;
+      padding-right: 28px;
+    }
+
+    @media screen and (min-width: 360px) and (max-width: 1024px) {
+      .center {
+        background-image: linear-gradient(#104375, #0576d5);
+        border-radius: 10px;
+      }
+
+      .information p {
+        margin-top: -20px;
+        text-align: justify;
+        font-size: 12px;
+      }
+    }
+
+    .role-heading {
+      margin-top: 40px;
+    }
+
+    .role-heading p {
+      font-weight: 700;
+      margin-right: 20px;
+      margin-bottom: 22px;
+    }
+
+    .role-heading .year {
+      color: #003152;
+      font-weight: 400;
+    }
+
+    .education-details .fa {
+      color: #003152;
+      margin-right: 7px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="information" class="center">
+    <div class="text-center">
+      <div>
+        <img
+          src="<%= imageUrl %>"
+          alt="Oscar barajas face" class="thin-border" />
+      </div>
+      <div class="details" style="font-size: 13px;">
+        <p style="color: white;">
+          <b style="font-size: 17px; padding-left: 50px;">
+            <%= first_name %>
+            <%= last_name %>
+          </b><br />
+        <div style="font-size: 14px; padding-left: 5px; color: white;"><%= job_title %></div><br /><br />
+        <div style="font-size:12.6px; color:white;"><%= self_intro_short %><br /><br />
+        </div>
+        <a href="<%= Facebook %>">
+          <i class="fa fa-facebook-official" style="color: white; font-size:30px;" aria-hidden="true"></i>
+        </a>
+        <a href="<%= LinkedIn %>">
+          <i class="fa fa-linkedin-square" aria-hidden="true" style="color: white; font-size:30px;"></i>
+        </a>
+
+        <a href="<%= Gmail %>">
+          <i class="fa fa-google" aria-hidden="true" style="color: white; font-size:30px;"></i>
+        </a>
+
+        <a href="<%= GitHub %>">
+          <i class="fa fa-github" aria-hidden="true" style="color: white; font-size:30px;"></i>
+        </a>
+        </p>
+      </div>
+      <br />
+    </div>
+  </div>
+
+  <div class="education-details">
+    <div>
+      <h3>
+        <i class="fa fa-briefcase" aria-hidden="true"></i>
+        <b>EXPERIENCE</b>
+      </h3>
+      <!-- <div class="role-heading">
+        <p>FrontEnd @ PRO APPS <span class="year">Jan 2016 - Present</span></p>
+      </div>
+      <p>
+        Researching, designing, implementing and managing software programs.
+        Testing and evaluating new programs. Identifying areas for
+        modification in existing programs and subsequently developing these
+        modifications. Writing and implementing efficient code.
+      </p> -->
+      <% for (let exp of experience) { %>
+        <div class="role-heading">
+          <p>
+            <%= exp.job_name %> 
+            <span class="year">
+                <%= exp.start_month %> <%= exp.start_year %> - <% if (exp.is_present) { %>
+                  present
+                  <% } else { %>
+                    <%= exp.end_month %>
+                      <%= exp.end_year %>
+                        <% } %>
+              </span>
+          </p>
+        </div>
+        <p>
+          <%= exp.job_des %>
+        </p>
+        <% } %>
+
+      <!-- <p>
+        Researching, designing, implementing and managing software programs.
+        Testing and evaluating new programs. Identifying areas for
+        modification in existing programs and subsequently developing these
+        modifications. Writing and implementing efficient code.
+      </p> -->
+    </div>
+    <hr>
+
+    <div>
+      <h3 class="word-font">
+        <br /><br /><i class="fa fa-graduation-cap" aria-hidden="true" style="font-size: 19px;"></i>EDUCATION
+      </h3>
+      <% for (let edu of education) { %>
+        <div class="role-heading">
+          <p>
+            <%= edu.school_name %>-<%= edu.school_major %> @ <%= edu.school_location %>
+              <span class="year">
+                <%= edu.start_month %>
+                  <%= edu.start_year %> - <% if (edu.is_present) { %>
+                      present
+                      <% } else { %>
+                        <%= edu.end_month %>
+                          <%= edu.end_year %>
+                            <% } %>
+              </span>
+          </p>
+        </div>
+        <p>
+          <%= edu.school_des %>
+        </p>
+        <% } %>
+      <!-- <div class="role-heading">
+        <p> My College @ Sanfrancisco College <span class="year">2007 - 2011</span></p>
+      </div>
+      <p>
+        Researching, designing, implementing and managing software programs.
+        Testing and evaluating new programs. Identifying areas for
+        modification in existing programs and subsequently developing these
+        modifications. Writing and implementing efficient code.
+      </p> -->
+    </div>
+
+    <hr>
+    <div>
+      <h3 class="word-font">
+        <br /><br /><i class="fa fa-trophy" aria-hidden="true" style="font-size: 21px;"></i>
+        CERTIFICATES
+      </h3>
+      <!-- <div class="role-heading">
+        <p> My College @ Sanfrancisco College <span class="year">2011 - 2014</span></p>
+      </div>
+      <p>
+        Researching, designing, implementing and managing software programs.
+        Testing and evaluating new programs. Identifying areas for
+        modification in existing programs and subsequently developing these
+        modifications. Writing and implementing efficient code.
+      </p> -->
+
+
+      <% for (let cert of certificate) { %>
+        <div class="role-heading">
+          <p>
+            <%= cert.cert_name %> @ <%= cert.cert_org %>
+                  <span class="year">
+                      <%= cert.cert_month %> <%= cert.cert_year %>
+                  </span>
+          </p>
+        </div>
+      <% } %>
+      <!-- <div class="role-heading">
+        <p> Graphic Designer @ Coursera <span class="year">Jan 2015</span></p>
+      </div>
+      <p>
+        Researching, designing, implementing and managing software programs.
+        Testing and evaluating new programs. Identifying areas for
+        modification in existing programs and subsequently developing these
+        modifications. Writing and implementing efficient code.
+      </p> -->
+    </div>
+  </div>
+</body>
+
+</html>

@@ -6,16 +6,6 @@ const { v4: uuidv4 } = require("uuid");
  *
  */
 class ResumeRepository {
-  /**
-   *
-   * @returns get all users id
-   */
-  async getAllUsersID() {
-    const data = await executeQuery("SELECT id FROM ??", [usersTable]);
-    console.log(data);
-    return data;
-  }
-
   // async findUsersByEmail({ email }) {
   //   const data = await executeQuery("SELECT * FROM ?? WHERE email = ?", [
   //     usersTable,
@@ -25,6 +15,16 @@ class ResumeRepository {
   //   return data;
   // }
 
+  async putResumeData(data) {
+    try {
+      await executeQuery("PUT", {
+        Item: data,
+      });
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  }
   /**
    *
    * @param { string } email

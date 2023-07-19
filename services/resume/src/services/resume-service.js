@@ -1,6 +1,8 @@
 const { ResumeRepository } = require("../db");
 
+const S3Service = require("../storage/index");
 // business logic related
+const { SECRET_ACCESS_KEY, ACCESS_KEY_ID } = require("../config");
 const {
   FormateData,
   GeneratePassword,
@@ -8,10 +10,18 @@ const {
   GenerateSignature,
   ValidatePassword,
 } = require("../utils");
+const ejs = require("ejs");
+const fs = require("fs");
+const path = require("path");
 
 class ResumeService {
   constructor() {
     this.repository = new ResumeRepository();
+    this.S3Service = new S3Service(
+      ACCESS_KEY_ID,
+      SECRET_ACCESS_KEY,
+      "us-east-1"
+    );
   }
 
   /**
@@ -27,9 +37,51 @@ class ResumeService {
    * 6. and return the html url to the user
    * @returns true => done, false => 沒有成功
    */
-  async insertResumeData(data) {
-    console.log("resume: ", data);
-    //     1. image -> s3, and get the image url
+  async generateResumeURL(data) {
+    // console.log("resume: ", data);
+    try {
+      // 避免一直產生新的 images, 等到開發完再把 Location 用回來
+
+      const { Location } = await this.S3Service.getInsertedImageUrl(data);
+
+      const { userId, resumeId, resumeData } = data;
+      // let Location =
+      //   "https://transition-service.s3.amazonaws.com/images/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/2823b0e3-a5e1-46b5-9a0e-8c888780b3a3/image.jpg";
+
+      const params = {
+        resume_id: resumeId,
+        userId,
+        ...resumeData,
+        experience: JSON.parse(resumeData["experience"]),
+        education: JSON.parse(resumeData["education"]),
+        certificate: JSON.parse(resumeData["certificate"]),
+        imageUrl: Location,
+      };
+
+      const isPutResumeDbSuccess = await this.repository.putResumeData(params);
+
+      if (isPutResumeDbSuccess) {
+        const htmlContent = await this.createResume(params);
+
+        const bucketName = "transition-service";
+        // const htmlFilePath = path.join(__dirname, "../template/template.html");
+        // const htmlContent = fs.readFileSync(htmlFilePath, "utf8");
+        const { Location } = await this.S3Service.getInsertedHtmlUrl({
+          bucketName,
+          htmlFile: htmlContent,
+          userId,
+          resumeId,
+        });
+
+        return FormateData({ htmlUrl: Location });
+        // start to draw the html file
+      }
+      // generate the html file, save all datatodynamodb first
+    } catch (err) {
+      throw err;
+    }
+
+    // 1. image -> s3, and get the image url
     // 2. all  the  other data to dynamodb
 
     // 3. create the html file
@@ -39,6 +91,63 @@ class ResumeService {
 
     // 6. and return the html url to the user
     // const insertData =
+  }
+
+  async createResume(data) {
+    try {
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      data.experience = data.experience.map((item) => ({
+        ...item,
+        start_month: months[item.start_month - 1],
+        end_month: months[item.end_month - 1],
+      }));
+
+      data.education = data.education.map((item) => ({
+        ...item,
+        start_month: months[item.start_month - 1],
+        end_month: months[item.end_month - 1],
+      }));
+
+      data.certificate = data.certificate.map((item) => ({
+        ...item,
+        cert_month: months[item.cert_month - 1],
+      }));
+      const templateFilePath = path.join(
+        __dirname,
+        "../template/resume_template.ejs"
+      );
+
+      const outputFilePath = path.join(__dirname, "../template/template.html");
+
+      const templateFile = fs.readFileSync(templateFilePath, "utf8");
+
+      const renderedTemplate = ejs.render(templateFile, data);
+      console.log(renderedTemplate);
+      fs.writeFile(outputFilePath, renderedTemplate, (err) => {
+        if (err) {
+          console.error("Error saving HTML file:", err);
+        } else {
+          console.log("HTML file saved successfully.");
+        }
+      });
+
+      return renderedTemplate;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async insertImageToS3(data) {

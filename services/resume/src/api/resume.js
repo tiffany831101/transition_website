@@ -1,14 +1,19 @@
 const ResumeService = require("../services/resume-service");
 const { PublishCustomerEvent, SubscribeMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
+const axios = require("axios");
+
 const { CUSTOMER_SERVICE } = require("../config");
 const {
   PublishMessage,
   checkAllInputFilled,
   ValidateSignature,
   GenerateSignature,
+  DecodeJWT,
 } = require("../utils");
 const { FRONTEND_URL } = require("../config");
+
+const { v4: uuidv4 } = require("uuid");
 
 // passport related
 const cookieSession = require("cookie-session");
@@ -26,17 +31,59 @@ module.exports = (app) => {
    * this is not used...
    */
 
-  app.post("/create_resume", upload.single("image"), async (req, res) => {
-    console.log("this is the create resume");
+  /**
+   * need to login, so need to verify UserAuth
+   */
+  app.post(
+    "/create_resume",
+    UserAuth,
+    upload.single("image"),
+    async (req, res) => {
+      try {
+        let b = req.body;
+        const uuid = uuidv4();
 
-    let b = req.body;
-    // console.log("req: ", req.file);
-    // const { image } = req.body;
-    // const imageData = req.body.image;
+        console.log("req: ", req.body);
+        const payload = await DecodeJWT(req);
 
-    // Create a buffer from the base64-encoded image data
-    // const imageBuffer = Buffer.from(imageData, "base64");
-    // const image = req.body.image;
+        console.log("payload: ", payload);
+        const insertedParams = {
+          bucketName: "transition-service",
+          imageFile: req.file.buffer,
+          userId: payload._id,
+          resumeId: uuid,
+          resumeData: req.body,
+        };
+
+        const data = await service.generateResumeURL(insertedParams);
+
+        // const data = {
+        //   data: {
+        //     htmlUrl:
+        //       "https://transition-service.s3.amazonaws.com/htmls/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/b3697f32-2891-4d99-ad84-e169440eb6f7/resume.html",
+        //   },
+        // };
+
+        res.status(200).json({ data });
+      } catch (err) {
+        console.log("err: ", err);
+      }
+      // console.log("this is the create resume");
+
+      // const { image } = req.body;
+      // const imageData = req.body.image;
+
+      // Create a buffer from the base64-encoded image data
+      // const imageBuffer = Buffer.from(imageData, "base64");
+      // const image = req.body.image;
+    }
+  );
+
+  app.post("/generate_pdf", async (req, res) => {
+    let { url } = req.body;
+    const response = await axios.get(url);
+    console.log(response);
+    return res.status(200).json({ htmlText: response.data });
   });
 
   app.get("/resume", async (req, res) => {
