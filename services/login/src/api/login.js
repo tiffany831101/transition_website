@@ -146,7 +146,7 @@ module.exports = (app) => {
     const token = await GenerateSignature({
       email,
       nickname: displayName,
-      id,
+      _id: id,
     });
 
     res.cookie("token", token, { httpOnly: false });
