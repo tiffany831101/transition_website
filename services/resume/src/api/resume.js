@@ -3,7 +3,6 @@ const { PublishCustomerEvent, SubscribeMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
 const axios = require("axios");
 
-const { CUSTOMER_SERVICE } = require("../config");
 const {
   PublishMessage,
   checkAllInputFilled,
@@ -46,25 +45,33 @@ module.exports = (app) => {
         console.log("req: ", req.body);
         const payload = await DecodeJWT(req);
 
+        const resumeData = {
+          ...req.body,
+          created_at: Date.now(),
+        };
         console.log("payload: ", payload);
         const insertedParams = {
           bucketName: "transition-service",
           imageFile: req.file.buffer,
           userId: payload._id,
           resumeId: uuid,
-          resumeData: req.body,
+          resumeData: resumeData,
         };
 
         const data = await service.generateResumeURL(insertedParams);
 
+        const { htmlUrl } = data.data;
+        const result = await service.insertHtmlUrl(uuid, htmlUrl);
+
+        if (result) {
+          res.status(200).json({ data });
+        }
         // const data = {
         //   data: {
         //     htmlUrl:
         //       "https://transition-service.s3.amazonaws.com/htmls/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/b3697f32-2891-4d99-ad84-e169440eb6f7/resume.html",
         //   },
         // };
-
-        res.status(200).json({ data });
       } catch (err) {
         console.log("err: ", err);
       }
@@ -79,15 +86,93 @@ module.exports = (app) => {
     }
   );
 
-  app.post("/generate_pdf", async (req, res) => {
+  app.post(
+    "/update_resume",
+    UserAuth,
+    upload.single("image"),
+    async (req, res) => {
+      try {
+        let b = req.body;
+
+        console.log("req: ", req.body);
+
+        const payload = await DecodeJWT(req);
+
+        const isChangeImage = !/^http/i.test(req.body.imageUrl); // Case-insensitive regex to check for "http" at the beginning of the URL
+
+        let resumeData;
+        resumeData = {
+          ...req.body,
+          created_at: Date.now(),
+        };
+
+        console.log("resumedata:", resumeData);
+        let insertedParams;
+        if (isChangeImage) {
+          insertedParams = {
+            bucketName: "transition-service",
+            imageFile: req.file.buffer,
+            userId: payload._id,
+            resumeId: resumeData.resume_id,
+            resumeData: resumeData,
+          };
+        } else {
+          insertedParams = {
+            bucketName: "transition-service",
+            imageFile: req.body.imageUrl,
+            userId: payload._id,
+            resumeId: resumeData.resume_id,
+            resumeData: resumeData,
+          };
+        }
+        console.log("payload: ", payload);
+
+        // const data = await service.generateResumeURL(insertedParams);
+
+        const data = await service.updateResumeURL(
+          insertedParams,
+          isChangeImage
+        );
+
+        // const { htmlUrl } = data.data;
+        // const result = await service.insertHtmlUrl(uuid, htmlUrl);
+
+        res.status(200).json({ data });
+        // if (result) {
+        //   res.status(200).json({ data });
+        // }
+        // const data = {
+        //   data: {
+        //     htmlUrl:
+        //       "https://transition-service.s3.amazonaws.com/htmls/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/b3697f32-2891-4d99-ad84-e169440eb6f7/resume.html",
+        //   },
+        // };
+      } catch (err) {
+        console.log("err: ", err);
+      }
+      // console.log("this is the create resume");
+
+      // const { image } = req.body;
+      // const imageData = req.body.image;
+
+      // Create a buffer from the base64-encoded image data
+      // const imageBuffer = Buffer.from(imageData, "base64");
+      // const image = req.body.image;
+    }
+  );
+
+  app.post("/generate_pdf", UserAuth, async (req, res) => {
     let { url } = req.body;
     const response = await axios.get(url);
     console.log(response);
     return res.status(200).json({ htmlText: response.data });
   });
 
-  app.get("/resume", async (req, res) => {
-    return res.status(200).json({ msg: "Hello from Resume" });
+  app.get("/resume", UserAuth, async (req, res) => {
+    const userId = req.user._id;
+    const resumes = await service.getResumeByUserId(userId);
+
+    return res.status(200).json({ resumes });
   });
 
   app.post("/register", async (req, res) => {

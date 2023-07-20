@@ -93,6 +93,60 @@ class ResumeService {
     // const insertData =
   }
 
+  async updateResumeURL(data, isChangeImage) {
+    try {
+      // 避免一直產生新的 images, 等到開發完再把 Location 用回來
+
+      let Location;
+      if (isChangeImage) {
+        const res = await this.S3Service.getUpdatedImageUrl(data);
+
+        Location = res;
+      } else {
+        Location = data.imageFile;
+      }
+
+      const { userId, resumeId, resumeData } = data;
+
+      // let Location =
+      //   "https://transition-service.s3.amazonaws.com/images/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/2823b0e3-a5e1-46b5-9a0e-8c888780b3a3/image.jpg";
+
+      const params = {
+        resume_id: resumeId,
+        userId,
+        ...resumeData,
+        experience: JSON.parse(resumeData["experience"]),
+        education: JSON.parse(resumeData["education"]),
+        certificate: JSON.parse(resumeData["certificate"]),
+        imageUrl: Location,
+      };
+
+      const isPutResumeDbSuccess = await this.repository.updateResumeData(
+        params
+      );
+
+      if (isPutResumeDbSuccess) {
+        const htmlContent = await this.createResume(params);
+
+        const bucketName = "transition-service";
+        // const htmlFilePath = path.join(__dirname, "../template/template.html");
+        // const htmlContent = fs.readFileSync(htmlFilePath, "utf8");
+        await this.S3Service.updateInsertedHtmlUrl({
+          bucketName,
+          htmlFile: htmlContent,
+          userId,
+          resumeId,
+        });
+
+        return FormateData({ htmlUrl: isPutResumeDbSuccess.html });
+        // start to draw the html file
+      }
+      // generate the html file, save all datatodynamodb first
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async createResume(data) {
     try {
       const months = [
@@ -152,6 +206,21 @@ class ResumeService {
 
   async insertImageToS3(data) {
     // insert to s3
+  }
+
+  async insertHtmlUrl(resumeId, htmlUrl) {
+    try {
+      const result = await this.repository.putHtmlUrlInDB(resumeId, htmlUrl);
+      return result.html;
+    } catch (error) {
+      console.error("Error updating resume data:", error);
+      throw error;
+    }
+  }
+
+  async getResumeByUserId(userId) {
+    const result = await this.repository.getResumeByUserId(userId);
+    return result;
   }
   /**
    * first check if user is created or not

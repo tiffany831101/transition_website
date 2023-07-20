@@ -43,6 +43,8 @@ async function executeQuery(queryType, params) {
       result = await dynamodb.query(queryParams).promise();
     } else if (queryType === "PUT") {
       result = await dynamodb.put(queryParams).promise(); // Use putParams without ConditionExpression
+    } else if (queryType === "UPDATE") {
+      result = await dynamodb.update(queryParams).promise(); // Use putParams without ConditionExpression
     } else {
       throw new Error("Invalid query type");
     }
