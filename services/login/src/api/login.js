@@ -2,6 +2,7 @@ const LoginService = require("../services/login-service");
 const { PublishCustomerEvent, SubscribeMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
 const { CUSTOMER_SERVICE } = require("../config");
+const promClient = require("prom-client");
 const {
   PublishMessage,
   checkAllInputFilled,
@@ -9,7 +10,7 @@ const {
   GenerateSignature,
 } = require("../utils");
 const { FRONTEND_URL } = require("../config");
-
+const { metrics, incrementMetric } = require("../utils/prometheus");
 // passport related
 const passport = require("passport");
 const cookieSession = require("cookie-session");
@@ -77,6 +78,7 @@ module.exports = (app) => {
         return;
       }
 
+      incrementMetric(metrics.signupRequests);
       const userToken = await service.signUp({ nickname, email, password });
 
       res.status(200).json(userToken);
@@ -86,6 +88,7 @@ module.exports = (app) => {
   });
   app.post("/signin", async (req, res) => {
     console.log("req: ", req);
+    incrementMetric(metrics.loginRequests);
     console.log("signin is running here...");
     try {
       const { email, password } = req.body;
@@ -161,6 +164,20 @@ module.exports = (app) => {
   });
 
   // end for google login
+
+  app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", promClient.register.contentType);
+    let metrics = await promClient.register.metrics();
+    res.send(metrics);
+    // const a = promClient.register.metrics();
+    // console.log(a);
+    // // res.set("Content-Type", promClient.register.contentType);
+    // res.send(promClient.register.metrics());
+  });
+
+  function incrementLoginRequests() {
+    loginRequests.inc();
+  }
 
   // SubscribeMessage(channel, service)
 

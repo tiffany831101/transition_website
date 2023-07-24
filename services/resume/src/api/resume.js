@@ -2,6 +2,7 @@ const ResumeService = require("../services/resume-service");
 const { PublishCustomerEvent, SubscribeMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
 const axios = require("axios");
+const promClient = require("prom-client");
 
 const {
   PublishMessage,
@@ -21,6 +22,7 @@ const multer = require("multer");
 
 // Configure multer middleware
 const upload = multer();
+const { metrics, incrementMetric } = require("../utils/prometheus");
 
 // 原本有 channel
 module.exports = (app) => {
@@ -41,6 +43,7 @@ module.exports = (app) => {
       try {
         let b = req.body;
         const uuid = uuidv4();
+        incrementMetric(metrics.createResumeRequests);
 
         console.log("req: ", req.body);
         const payload = await DecodeJWT(req);
@@ -95,6 +98,7 @@ module.exports = (app) => {
         let b = req.body;
 
         console.log("req: ", req.body);
+        incrementMetric(metrics.updateResumeRequests);
 
         const payload = await DecodeJWT(req);
 
@@ -171,6 +175,7 @@ module.exports = (app) => {
   app.get("/resume", UserAuth, async (req, res) => {
     const userId = req.user._id;
     const resumes = await service.getResumeByUserId(userId);
+    incrementMetric(metrics.getResumeRequests);
 
     return res.status(200).json({ resumes });
   });
@@ -222,10 +227,22 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/test", UserAuth, async (req, res) => {
+  app.get("/test", async (req, res) => {
+    incrementMetric(metrics.getResumeRequests);
+
     res.status(200).json({
       status: "success",
     });
+  });
+
+  app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", promClient.register.contentType);
+    let metrics = await promClient.register.metrics();
+    res.send(metrics);
+    // const a = promClient.register.metrics();
+    // console.log(a);
+    // // res.set("Content-Type", promClient.register.contentType);
+    // res.send(promClient.register.metrics());
   });
 
   // SubscribeMessage(channel, service)
