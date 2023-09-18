@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'login-service'
+    static_configs:
+      # - targets: ['172.24.128.1:8003']
+      - targets: ['frontend-elb-753027556.us-east-1.elb.amazonaws.com:3000']
+  - job_name: 'resume-service'
+    static_configs:
+      # - targets: ['172.20.10.3:8004']
+      - targets: ['frontend-elb-753027556.us-east-1.elb.amazonaws.com:3001']
+

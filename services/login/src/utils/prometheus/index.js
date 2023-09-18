@@ -15,6 +15,12 @@ const metrics = {
   // You can add more metrics here for other APIs
 };
 
+const httpStatusCodesCounter = new promClient.Counter({
+  name: "http_status_codes",
+  help: "HTTP status codes count",
+  labelNames: ["status_code", "action"],
+});
+
 // Function to increment a specific metric
 function incrementMetric(metric) {
   metric.inc();
@@ -24,4 +30,5 @@ function incrementMetric(metric) {
 module.exports = {
   metrics,
   incrementMetric,
+  httpStatusCodesCounter,
 };

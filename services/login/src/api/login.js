@@ -10,7 +10,11 @@ const {
   GenerateSignature,
 } = require("../utils");
 const { FRONTEND_URL } = require("../config");
-const { metrics, incrementMetric } = require("../utils/prometheus");
+const {
+  metrics,
+  incrementMetric,
+  httpStatusCodesCounter,
+} = require("../utils/prometheus");
 // passport related
 const passport = require("passport");
 const cookieSession = require("cookie-session");
@@ -72,16 +76,24 @@ module.exports = (app) => {
 
   app.post("/signup", async (req, res) => {
     try {
+      incrementMetric(metrics.signupRequests);
       const { nickname, email, password } = req.body;
       if (!(nickname && email && password)) {
+        httpStatusCodesCounter.inc({
+          status_code: 400,
+          action: "signup",
+        });
         res.status(400).send("All input is required");
         return;
       }
 
-      incrementMetric(metrics.signupRequests);
       const userToken = await service.signUp({ nickname, email, password });
 
       res.status(200).json(userToken);
+      httpStatusCodesCounter.inc({
+        status_code: 200,
+        action: "signup",
+      });
     } catch (err) {
       console.log(err);
     }
@@ -97,6 +109,10 @@ module.exports = (app) => {
         password,
       });
       if (!isAllInputFieldFilled) {
+        httpStatusCodesCounter.inc({
+          status_code: 400,
+          action: "signin",
+        });
         res.status(400).send("All input is required");
         return;
       }
@@ -104,6 +120,10 @@ module.exports = (app) => {
       const userToken = await service.signIn({ email, password });
 
       res.status(200).json(userToken);
+      httpStatusCodesCounter.inc({
+        status_code: 200,
+        action: "signin",
+      });
     } catch (err) {
       console.log(err);
     }
