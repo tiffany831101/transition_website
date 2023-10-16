@@ -70,6 +70,7 @@ jobs:
           echo "OS_NODE=${{ secrets.OS_NODE }}" >> services/resume/.env
           echo "OS_PASSWORD=${{ secrets.OS_PASSWORD }}" >> services/resume/.env
           echo "OS_USERNAME=${{ secrets.OS_USERNAME }}" >> services/resume/.env
+          echo "CDN_ID=${{ secrets.CDN_ID }}" >> services/resume/.env
 
       - name: Create nginx.conf file
         env:

@@ -18,4 +18,5 @@ module.exports = {
   OS_USERNAME: process.env.OS_USERNAME,
   OS_PASSWORD: process.env.OS_PASSWORD,
   OS_NODE: process.env.OS_NODE,
+  CDN_ID: process.env.CDN_ID,
 };

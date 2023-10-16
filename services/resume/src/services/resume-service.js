@@ -2,7 +2,7 @@ const { ResumeRepository } = require("../db");
 
 const S3Service = require("../storage/index");
 // business logic related
-const { SECRET_ACCESS_KEY, ACCESS_KEY_ID } = require("../config");
+const { SECRET_ACCESS_KEY, ACCESS_KEY_ID, CDN_ID } = require("../config");
 const {
   FormateData,
   GeneratePassword,
@@ -13,6 +13,7 @@ const {
 const ejs = require("ejs");
 const fs = require("fs");
 const path = require("path");
+console.log(CDN_ID);
 
 class ResumeService {
   constructor() {
@@ -48,6 +49,8 @@ class ResumeService {
       // let Location =
       //   "https://transition-service.s3.amazonaws.com/images/ce5c11cd-d22b-4a3c-94e6-c72339bd6e02/2823b0e3-a5e1-46b5-9a0e-8c888780b3a3/image.jpg";
 
+      let cdnImageUrl = `https://${CDN_ID}.cloudfront.net/images/${userId}/${resumeId}/image.jpg`;
+
       const params = {
         resume_id: resumeId,
         userId,
@@ -55,7 +58,7 @@ class ResumeService {
         experience: JSON.parse(resumeData["experience"]),
         education: JSON.parse(resumeData["education"]),
         certificate: JSON.parse(resumeData["certificate"]),
-        imageUrl: Location,
+        imageUrl: cdnImageUrl,
       };
 
       const isPutResumeDbSuccess = await this.repository.putResumeData(params);
@@ -73,7 +76,13 @@ class ResumeService {
           resumeId,
         });
 
-        return FormateData({ htmlUrl: Location });
+        if (Location) {
+          let cdnUrl = `https://${CDN_ID}.cloudfront.net/htmls/${userId}/${resumeId}/resume.html`;
+
+          return FormateData({ htmlUrl: cdnUrl });
+        }
+
+        // return FormateData({ htmlUrl: Location });
         // start to draw the html file
       }
       // generate the html file, save all datatodynamodb first
@@ -138,7 +147,9 @@ class ResumeService {
           resumeId,
         });
 
-        return FormateData({ htmlUrl: isPutResumeDbSuccess.html });
+        let cdnUrl = `https://${CDN_ID}.cloudfront.net/htmls/${userId}/${resumeId}/resume.html`;
+
+        return FormateData({ htmlUrl: cdnUrl });
         // start to draw the html file
       }
       // generate the html file, save all datatodynamodb first

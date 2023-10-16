@@ -14,6 +14,7 @@ module.exports = async (app) => {
       extended: true,
     })
   );
+  app.use(bodyParser.text({ limit: "200mb" }));
   // app.use(express.static(__dirname + '/public'))
 
   //api

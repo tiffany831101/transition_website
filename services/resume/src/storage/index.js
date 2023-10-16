@@ -1,4 +1,5 @@
 const AWS = require("aws-sdk");
+const { CDN_ID } = require("../config");
 
 class S3Service {
   constructor(accessKeyId, secretAccessKey, region) {
@@ -25,7 +26,7 @@ class S3Service {
         .putObject(imageUploadParams)
         .promise();
 
-      const imageUrl = `https://${bucketName}.s3.amazonaws.com/${imageFileName}`;
+      const imageUrl = `https://${CDN_ID}.cloudfront.net/${imageFileName}`;
 
       return imageUrl;
     } catch (err) {
