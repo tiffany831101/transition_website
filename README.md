@@ -1,7 +1,8 @@
 # Transition Website
-![backend_service](https://github.com/tiffany831101/transition_website/assets/39373272/9478e494-9e03-448d-8862-42bf3b7b29f2)
+![backend_service](https://github.com/tiffany831101/transition_website/assets/39373272/d8e7b405-8c15-4773-8523-0b1c67995990)
 
 ## Table of Contents
+
 - [Transition Website](#transition-website)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
