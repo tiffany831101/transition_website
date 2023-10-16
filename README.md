@@ -34,7 +34,7 @@ To achieve its objectives, this backend service leverages the following architec
 - **Monitoring and Logging:** 
   - **Grafana and Prometheus:** Monitors API requests.
   - **CloudWatch:** Monitors ECS memory and CPU usage.
-  - **Elasticsearch:** Collects and analyzes logs.
+  - **Cloudfront:** Acts as the CDN in front of S3 buckets.
 - **Authentication:**
   - **JWT:** Clients need to include the JWT token in the authorization header.
   - **Google Account Integration:** Google OAuth2.0 Authentication
